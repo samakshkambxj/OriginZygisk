@@ -12,8 +12,8 @@ COMMIT_HASH ?= $(shell git -C "$(ROOT_DIR)" rev-parse --verify --short HEAD 2>/d
 MIN_KSU_VERSION ?= 10940
 MIN_KSUD_VERSION ?= 11425
 
-MODULE_ID ?= rezygisk
-MODULE_NAME ?= BreZygisk
+MODULE_ID ?= originzygisk
+MODULE_NAME ?= OriginZygisk
 
 NDK_VERSION ?= 29.0.13113456
 ANDROID_HOME ?= $(HOME)/Android/Sdk

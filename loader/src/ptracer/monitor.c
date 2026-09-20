@@ -795,7 +795,7 @@ static char post_section[1024];
 
 #define WRITE_STATUS_ABI(suffix)                                                     \
   if (status ## suffix.supported) {                                                  \
-    strcat(status_text, ", ReZygisk " # suffix "-bit: ");                            \
+    strcat(status_text, ", OriginZygisk " # suffix "-bit: ");                            \
                                                                                      \
     if (tracing_state != TRACING) strcat(status_text, "❌");                         \
     else if (status ## suffix.zygote_injected && status ## suffix.daemon_running)    \
@@ -804,11 +804,11 @@ static char post_section[1024];
                                                                                      \
     if (!status ## suffix.daemon_running) {                                          \
       if (status ## suffix.daemon_error_info) {                                      \
-        strcat(status_text, "(ReZygiskd: ");                                         \
+        strcat(status_text, "(OriginZygiskd: ");                                         \
         strcat(status_text, status ## suffix.daemon_error_info);                     \
         strcat(status_text, ")");                                                    \
       } else {                                                                       \
-        strcat(status_text, "(ReZygiskd: not running)");                             \
+        strcat(status_text, "(OriginZygiskd: not running)");                             \
       }                                                                              \
     }                                                                                \
   }
@@ -968,7 +968,7 @@ static bool prepare_environment() {
 }
 
 void init_monitor() {
-  LOGI("ReZygisk %s", ZKSU_VERSION);
+  LOGI("OriginZygisk %s", ZKSU_VERSION);
 
   if (!prepare_environment()) exit(1);
 

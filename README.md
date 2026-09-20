@@ -1,6 +1,6 @@
-# BreZygisk
+# OriginZygisk
 
-BreZygisk is a fork of ReZygisk.
+OriginZygisk is a fork of BreZygisk (a ReZygisk fork), maintained for OriginSU.
 
 [Changelog](https://github.com/PerformanC/ReZygisk/compare/main...rrr333nnn333:BreZygisk:main)
 

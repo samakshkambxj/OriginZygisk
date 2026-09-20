@@ -5,7 +5,7 @@ zygisksu
 for i in ${modules}; do
 	[[ -e "/data/adb/modules/${i}" ]] && touch "/data/adb/modules/${i}/disable"
 done
-[[ -e "/data/adb/modules/brezygisk" ]] && touch "/data/adb/modules/brezygisk/remove"
+[[ -e "/data/adb/modules/originzygisk" ]] && touch "/data/adb/modules/originzygisk/remove"
 
 # shellcheck disable=SC2034
 SKIPUNZIP=1
@@ -37,7 +37,7 @@ else
 fi
 
 VERSION=$(grep_prop version "${TMPDIR}/module.prop")
-ui_print "- Installing ReZygisk $VERSION"
+ui_print "- Installing OriginZygisk $VERSION"
 
 # check android
 if [ "$API" -lt 25 ]; then
@@ -82,12 +82,12 @@ extract "$ZIPFILE" 'module.prop'     "$MODPATH"
 extract "$ZIPFILE" 'post-fs-data.sh' "$MODPATH"
 extract "$ZIPFILE" 'service.sh'      "$MODPATH"
 extract "$ZIPFILE" 'uninstall.sh'    "$MODPATH"
-extract "$ZIPFILE" 'rezygisk.sh' "/data/adb/service.d/"
+extract "$ZIPFILE" 'originzygisk.sh' "/data/adb/service.d/"
 
 cp "$MODPATH/module.prop" "$MODPATH/module.prop.bak"
 
 chmod +x "$MODPATH/uninstall.sh"
-chmod +x "/data/adb/service.d/rezygisk.sh"
+chmod +x "/data/adb/service.d/originzygisk.sh"
 
 mv "$TMPDIR/sepolicy.rule" "$MODPATH"
 

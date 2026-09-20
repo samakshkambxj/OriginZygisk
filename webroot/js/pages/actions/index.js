@@ -5,7 +5,7 @@ import { exec, toast } from '../../kernelsu.js'
 async function _getMonitorState() {
   const stateCmd = await exec('/system/bin/cat /data/adb/rezygisk/state.json')
   if (stateCmd.errno !== 0) {
-    toast('Error getting state of ReZygisk!')
+    toast('Error getting state of OriginZygisk!')
 
     return;
   }

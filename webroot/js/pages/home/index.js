@@ -11,7 +11,7 @@ let rzState = {
 async function _getReZygiskState() {
   let stateCmd = await exec('/system/bin/cat /data/adb/rezygisk/state.json')
   if (stateCmd.errno !== 0) {
-    toast('Error getting state of ReZygisk!')
+    toast('Error getting state of OriginZygisk!')
 
     return;
   }
@@ -27,7 +27,7 @@ async function _getReZygiskState() {
 async function _getVersion() {
   let moduleProp = await exec('cat /data/adb/modules/rezygisk/module.prop')
   if (moduleProp.errno !== 0) {
-    toast('Error getting state of ReZygisk!')
+    toast('Error getting state of OriginZygisk!')
 
     return;
   }
