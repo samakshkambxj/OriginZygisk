@@ -814,7 +814,7 @@ static char post_section[1024];
   }
 
 static bool update_status(const char *message) {
-  FILE *prop = fopen("/data/adb/modules/rezygisk/module.prop", "w");
+  FILE *prop = fopen("/data/adb/ksu/originzygisk/module.prop", "w");
   if (prop == NULL) {
     PLOGE("failed to open prop");
 
@@ -939,7 +939,7 @@ static bool update_status(const char *message) {
 }
 
 static bool prepare_environment() {
-  FILE *orig_prop = fopen("/data/adb/modules/rezygisk/module.prop", "r");
+  FILE *orig_prop = fopen("/data/adb/ksu/originzygisk/module.prop", "r");
   if (orig_prop == NULL) {
     PLOGE("failed to open orig prop");
 

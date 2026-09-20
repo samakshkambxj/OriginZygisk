@@ -31,7 +31,7 @@ struct Context {
 #define CONTROLLER_SOCKET TMP_PATH "/init_monitor"
 #define PATH_CP_NAME TMP_PATH "/" LP_SELECT("cp32.sock", "cp64.sock")
 #define ZYGISKD_FILE PATH_MODULES_DIR "/rezygisk/bin/zygiskd" LP_SELECT("32", "64")
-#define ZYGISKD_PATH "/data/adb/modules/rezygisk/bin/zygiskd" LP_SELECT("32", "64")
+#define ZYGISKD_PATH "/data/adb/ksu/originzygisk/bin/zygiskd" LP_SELECT("32", "64")
 
 #ifdef __aarch64__
   #define ARCH_STR "arm64-v8a"
