@@ -7,10 +7,13 @@
 set -e
 MODDIR="${1:-build/module/release}"
 OUT="${2:-build/out/payload.zip}"
+OUT_DIR=$(dirname "$OUT")
+mkdir -p "$OUT_DIR"
+OUT="$(cd "$OUT_DIR" && pwd)/$(basename "$OUT")"
 VER_NAME="${VER_NAME:-$(git rev-parse --verify --short HEAD 2>/dev/null || echo unknown)}"
 
 rm -f "$OUT"
-mkdir -p "$(dirname "$OUT")" /tmp/origin-payload-staging
+mkdir -p /tmp/origin-payload-staging
 STAGE=/tmp/origin-payload-staging
 rm -rf "$STAGE"
 mkdir -p "$STAGE"
