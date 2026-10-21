@@ -251,9 +251,8 @@ bool ksu_uid_is_manager(uid_t uid) {
     return false;
   }
 
-  /* INFO: For Private Space, UID will be 10xxxxx, being xxxxx the original UID. To check if
-             the UID is the manager UID in Private Space, we "normalize" it with the modulo operator. */
-  return uid % 100000 == cmd.uid;
+  /* INFO: KernelSU's IOCTL command already returns the app_id. */
+  return APP_ID(uid) == cmd.uid;
 }
 
 void ksu_cleanup(void) {

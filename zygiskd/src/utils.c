@@ -456,9 +456,24 @@ int non_blocking_execv(const char *restrict file, char *const argv[]) {
 
 void stringify_root_impl_name(struct root_impl impl, char *restrict output) {
   switch (impl.impl) {
+    case None: {
+      strcpy(output, "None");
+
+      break;
+    }
+    case Multiple: {
+      strcpy(output, "Multiple");
+
+      break;
+    }
     case KernelSU: {
       if (impl.variant == KOfficial) strcpy(output, "KernelSU");
       // else strcpy(output, "KernelSU Next");
+
+      break;
+    }
+    default: {
+      strcpy(output, "Unknown");
 
       break;
     }

@@ -37,7 +37,8 @@ MODULE_INPUTS = scripts/sign.py \
 
 .PHONY: debug release build clean                                         \
         installKsu                                                        \
-        installKsuAndReboot
+        installKsuAndReboot                                               \
+        analyzer
 
 debug:
 	$(MAKE) BUILD_TYPE=debug BUILD_DIR=$(BUILD_DIR) build
@@ -116,6 +117,13 @@ installKsu: build
 
 installKsuAndReboot: installKsu
 	$(REBOOT_CMD)
+
+analyzer:
+	$(MAKE) -C loader clean BUILD_TYPE=debug BUILD_DIR=$(BUILD_DIR)
+	$(MAKE) -C zygiskd clean BUILD_TYPE=debug BUILD_DIR=$(BUILD_DIR)
+	@rm -f $(BUILD_DIR)/module-debug.done $(BUILD_DIR)/obj/debug/loader/.done $(BUILD_DIR)/obj/debug/zygiskd/.done
+	@$(MAKE) -k BUILD_TYPE=debug ARCH=arm64-v8a ARCHS="arm64-v8a" build \
+		CC='$(TOOLCHAIN)/bin/clang --analyze -Wno-unused-command-line-argument -Xanalyzer -analyzer-output=text'
 
 clean:
 	rm -rf $(BUILD_DIR)
