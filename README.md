@@ -9,6 +9,7 @@ OriginZygisk is a fork of BreZygisk (a ReZygisk fork), maintained for OriginSU.
 - The module description is updated by the monitor with the current 64-bit and 32-bit daemon state.
 - The module **Action** button prints the version, monitor process state and the engine's `state.json`.
 - `state.json` is written atomically and contains the root implementation, loaded modules and monitor/daemon errors. It is valid JSON even when the monitor stops with a reason.
+- The WebUI home page includes an OriginZygisk Umount toggle backed by `/data/adb/ksu/originzygisk/unmount`.
 
 # ReZygisk
 

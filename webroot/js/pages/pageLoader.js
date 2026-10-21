@@ -657,3 +657,26 @@ window.addEventListener('popstate', async () => {
 
   await loadPage('home')
 })
+
+document.addEventListener('change', event => {
+  if (!event.target || !event.target.matches('#umount_toggle')) return
+
+  const toggle = event.target
+  if (toggle.checked) {
+    exec('mkdir -p /data/adb/ksu/originzygisk')
+    exec('touch /data/adb/ksu/originzygisk/unmount')
+  } else {
+    exec('rm -f /data/adb/ksu/originzygisk/unmount')
+  }
+})
+
+const umountToggleInterval = setInterval(() => {
+  const toggle = document.getElementById('umount_toggle')
+  if (!toggle) return
+
+  clearInterval(umountToggleInterval)
+
+  exec("[[ -e '/data/adb/ksu/originzygisk/unmount' ]] && echo '1' || echo '0'").then(result => {
+    if (result.errno === 0) toggle.checked = Boolean(Number(result.stdout))
+  })
+}, 1000)
