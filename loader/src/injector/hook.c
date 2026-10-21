@@ -1082,13 +1082,12 @@ static void rz_app_specialize_pre(struct zygisk_context *ctx) {
 
   /* INFO: Per-app policy. The process has already been injected with
              libzygisk.so by Zygote, but no module callbacks or mounts should
-             run for this app. */
+             run for this app. Keep the rest of the specialization path intact
+             so denylist/clean mount namespace handling still applies. */
   if ((ctx->info_flags & PROCESS_SKIP_ZYGISK) == PROCESS_SKIP_ZYGISK) {
     LOGD("Skipping Zygisk modules for [%s] (per-app policy)", ctx->process);
 
     FLAG_SET(ctx, SKIP_MODULES);
-
-    return;
   }
 
   /* INFO: To ensure we are really using a clean mount namespace, we use
@@ -1145,7 +1144,7 @@ static void rz_app_specialize_pre(struct zygisk_context *ctx) {
   /* INFO: Executed after setns to ensure a module can update the mounts of an
               application without worrying about it being overwritten by setns.
   */
-  rz_run_modules_pre(ctx);
+  if (!FLAG_GET(ctx, SKIP_MODULES)) rz_run_modules_pre(ctx);
 
   /* INFO: The modules may request that although the process is NOT in
               the DenyList, it has its mount namespace switched to the clean
