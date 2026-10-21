@@ -25,11 +25,11 @@ async function _updateDynamicElement() {
 
   if (monitorState == null) return;
 
-  switch (monitorState) {
-    case '0': monitor_status.innerHTML = strings.monitor.status.tracing; break;
-    case '1': monitor_status.innerHTML = strings.monitor.status.stopping; break;
-    case '2': monitor_status.innerHTML = strings.monitor.status.stopped; break;
-    case '3': monitor_status.innerHTML = strings.monitor.status.exiting; break;
+  switch (Number(monitorState)) {
+    case 0: monitor_status.innerHTML = strings.monitor.status.tracing; break;
+    case 1: monitor_status.innerHTML = strings.monitor.status.stopping; break;
+    case 2: monitor_status.innerHTML = strings.monitor.status.stopped; break;
+    case 3: monitor_status.innerHTML = strings.monitor.status.exiting; break;
     default: monitor_status.innerHTML = strings.monitor.status.unknown;
   }
 }

@@ -5,7 +5,7 @@ const developmentResponse = {
       {
         "root": "KernelSU",
         "monitor": {
-          "state": "0"
+          "state": 0
         },
         "rezygiskd": {
           "64": {
