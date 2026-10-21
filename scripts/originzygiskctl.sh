@@ -61,13 +61,21 @@ list_modules() {
     [ -d "$d" ] || continue
     id=${d##*/}
     [ -f "$d/module.prop" ] || continue
-    libs=$(ls "$d/zygisk"/*.so 2>/dev/null | sed 's|.*/||' | tr '\n' ' ')
+    libs=
+    for lib in "$d/zygisk"/*.so; do
+      [ -f "$lib" ] || continue
+      libs="$libs ${lib##*/}"
+    done
     [ -n "$libs" ] || continue
     name=$(sed -n 's/^name=//p' "$d/module.prop" | head -n 1)
     module_state=loaded
-    [ -f "$d/disable" ] && module_state=module-disabled
-    grep -qxF "$id" "$DIR/disabled_modules.txt" 2>/dev/null && module_state=zygisk-disabled
-    grep -qxF "$id" "$DIR/quarantine.txt" 2>/dev/null && module_state=quarantined
+    if [ -f "$d/disable" ]; then module_state=module-disabled; fi
+    if grep -qxF "$id" "$DIR/disabled_modules.txt" 2>/dev/null; then
+      module_state=zygisk-disabled
+    fi
+    if grep -qxF "$id" "$DIR/quarantine.txt" 2>/dev/null; then
+      module_state=quarantined
+    fi
     printf '%s\t%s\t%s\t%s\n' "$id" "$name" "$module_state" "$libs"
   done
 }
@@ -151,14 +159,24 @@ case "$1" in
     esac
     ;;
   diagnostics)
+    if [ -f "$DIR/enable" ]; then enabled_state=yes; else enabled_state=no; fi
+    if [ -f "$DIR/unmount" ]; then umount_state=yes; else umount_state=no; fi
+    if pgrep -f '[z]ygisk-ptrace' >/dev/null 2>&1; then
+      monitor_state=running
+    else
+      monitor_state=stopped
+    fi
     echo "time=$(date)"
     echo "runtime=$DIR"
     echo "version=$(cat "$DIR/payload/version" 2>/dev/null || echo unknown)"
-    echo "enabled=$([ -f "$DIR/enable" ] && echo yes || echo no)"
-    echo "umount=$([ -f "$DIR/unmount" ] && echo yes || echo no)"
-    echo "monitor=$(pgrep -f '[z]ygisk-ptrace' >/dev/null 2>&1 && echo running || echo stopped)"
+    echo "enabled=$enabled_state"
+    echo "umount=$umount_state"
+    echo "monitor=$monitor_state"
     echo "integrity:"
-    (cd "$DIR" && sha256sum -c deployed.sha256 2>&1) || true
+    (
+      cd "$DIR" || exit 1
+      sha256sum -c deployed.sha256 2>&1 || true
+    )
     echo
     echo "policies:"
     echo "  skip_packages:"; sed 's/^/    /' "$DIR/skip_packages.txt" 2>/dev/null || true
