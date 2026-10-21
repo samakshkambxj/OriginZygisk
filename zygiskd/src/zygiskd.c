@@ -336,6 +336,7 @@ void zygiskd_start(char *restrict argv[]) {
     message->len = (uint32_t)info_len;
 
     struct rzd_info_payload *info = (void *)message->data;
+    memset(info->impl, 0, sizeof(info->impl));
     stringify_root_impl_name(impl, info->impl);
     info->modules_count = (uint32_t)context.len;
 
