@@ -12,6 +12,7 @@
 #include <unistd.h>
 
 #include "constants.h"
+#include "policy.h"
 #include "root_impl/common.h"
 #include "utils.h"
 
@@ -87,6 +88,12 @@ static void load_modules(struct Context *restrict context) {
     snprintf(disabled, PATH_MAX, "/data/adb/modules/%s/disable", name);
 
     if (access(disabled, F_OK) == 0) continue;
+
+    if (policy_module_disabled(name)) {
+      LOGI("Skipping module \"%s\" (disabled or quarantined by policy)", name);
+
+      continue;
+    }
 
     int lib_fd = open(so_path, O_RDONLY | O_CLOEXEC);
     if (lib_fd == -1) {
@@ -317,6 +324,8 @@ void zygiskd_start(char *restrict argv[]) {
   } else {
     load_modules(&context);
 
+    telemetry_event("daemon_start", ARCH_STR, 0, NULL, (uint32_t)context.len, false);
+
     size_t info_len = sizeof(struct rzd_info_payload);
     for (size_t i = 0; i < context.len; i++) {
       info_len += strlen(context.modules[i].name) + 1;
@@ -396,6 +405,8 @@ void zygiskd_start(char *restrict argv[]) {
 
     switch (action) {
       case ZygoteInjected: {
+        telemetry_event("zygote_injected", ARCH_STR, 0, NULL, 0, false);
+
         struct rzd_msg_header hdr = {
           .cmd = ZYGOTE_INJECTED,
           .len = 0
@@ -456,6 +467,11 @@ void zygiskd_start(char *restrict argv[]) {
             break;
           }
         }
+
+        bool skipped = policy_process_skipped((uid_t)uid, process);
+        if (skipped) flags |= PROCESS_SKIP_ZYGISK;
+
+        telemetry_event("process", ARCH_STR, (uid_t)uid, process, flags, skipped);
 
         ret = write_uint32_t(client_fd, flags);
         ASSURE_SIZE_WRITE("GetProcessFlags", "flags", ret, sizeof(flags), break);
@@ -550,6 +566,8 @@ void zygiskd_start(char *restrict argv[]) {
             LOGE(" - No companion spawned for \"%s\" because it has no entry.", module->name);
           } else {
             LOGE(" - Failed to spawn companion for \"%s\": %s", module->name, strerror(errno));
+
+            telemetry_event("companion_error", ARCH_STR, 0, module->name, 0, false);
           }
         }
 
@@ -662,6 +680,8 @@ void zygiskd_start(char *restrict argv[]) {
         }
 
         struct Module *module = &context.modules[index];
+        telemetry_event("module_removed", ARCH_STR, 0, module->name, 0, false);
+
         if (module->companion >= 0) {
           close(module->companion);
           module->companion = -1;

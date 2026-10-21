@@ -37,6 +37,7 @@ enum {
   SERVER_FORK_AND_SPECIALIZE,
   DO_REVERT_UNMOUNT,
   SKIP_FD_SANITIZATION,
+  SKIP_MODULES,
 
   FLAG_MAX
 };
@@ -1078,6 +1079,18 @@ static void rz_app_specialize_pre(struct zygisk_context *ctx) {
   }
 
   ctx->info_flags = rezygiskd_get_process_flags(uid, ctx->process);
+
+  /* INFO: Per-app policy. The process has already been injected with
+             libzygisk.so by Zygote, but no module callbacks or mounts should
+             run for this app. */
+  if ((ctx->info_flags & PROCESS_SKIP_ZYGISK) == PROCESS_SKIP_ZYGISK) {
+    LOGD("Skipping Zygisk modules for [%s] (per-app policy)", ctx->process);
+
+    FLAG_SET(ctx, SKIP_MODULES);
+
+    return;
+  }
+
   /* INFO: To ensure we are really using a clean mount namespace, we use
               the first process it as reference for clean mount namespace,
               before it even does something, so that it will be clean yet
@@ -1147,7 +1160,7 @@ static void rz_app_specialize_pre(struct zygisk_context *ctx) {
 }
 
 static void rz_app_specialize_post(struct zygisk_context *ctx) {
-  rz_run_modules_post(ctx);
+  if (!FLAG_GET(ctx, SKIP_MODULES)) rz_run_modules_post(ctx);
 
   /* INFO: Allow the process name string to be released */
   (*ctx->env)->ReleaseStringUTFChars(ctx->env, *ctx->args.app->nice_name, ctx->process);

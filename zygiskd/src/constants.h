@@ -25,6 +25,7 @@ enum DaemonSocketAction {
 enum ProcessFlags: uint32_t {
   PROCESS_GRANTED_ROOT = (1u << 0),
   PROCESS_ON_DENYLIST = (1u << 1),
+  PROCESS_SKIP_ZYGISK = (1u << 2),
   PROCESS_IS_MANAGER = (1u << 27),
   PROCESS_ROOT_IS_KSU = (1u << 29),
   PROCESS_IS_FIRST_STARTED = (1u << 31)

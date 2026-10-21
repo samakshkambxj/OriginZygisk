@@ -28,7 +28,12 @@ for m in arm arm64 x86 x86_64; do
   [ -f "$MODDIR/machikado.$m" ] && cp "$MODDIR/machikado.$m" "$STAGE/machikado.$m"
 done
 cp "$MODDIR/sepolicy.rule" "$STAGE/sepolicy.rule"
+[ -f "$MODDIR/originzygiskctl.sh" ] && cp "$MODDIR/originzygiskctl.sh" "$STAGE/originzygiskctl.sh"
 printf '%s\n' "v1.0.0-$VER_NAME" > "$STAGE/version"
+
+# Checksums are verified by setup.sh before the runtime is modified.
+(cd "$STAGE" && find . -type f ! -name manifest.sha256 -exec sha256sum {} \; \
+  | sed 's|  \./|  |' | sort -k2 > manifest.sha256)
 
 cd "$STAGE" && zip -r9 "$OUT" . -x '*.DS_Store' > /dev/null
 rm -rf "$STAGE"

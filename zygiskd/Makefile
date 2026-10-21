@@ -25,7 +25,7 @@ ZYGISKD_CFLAGS = -D_GNU_SOURCE -std=c99 -Wpedantic -Wall -Wextra -Werror  \
 
 SRCS = src/root_impl/common.c        \
 	   src/root_impl/kernelsu.c                               \
-	   src/companion.c src/main.c src/utils.c src/zygiskd.c
+	   src/companion.c src/main.c src/policy.c src/utils.c src/zygiskd.c
 
 OBJS = $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(SRCS))
 BIN = $(OBJ_DIR)/zygiskd

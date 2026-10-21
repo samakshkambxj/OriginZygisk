@@ -10,6 +10,10 @@ OriginZygisk is a fork of BreZygisk (a ReZygisk fork), maintained for OriginSU.
 - The module **Action** button prints the version, monitor process state and the engine's `state.json`.
 - `state.json` is written atomically and contains the root implementation, loaded modules and monitor/daemon errors. It is valid JSON even when the monitor stops with a reason.
 - The WebUI home page includes an OriginZygisk Umount toggle backed by `/data/adb/ksu/originzygisk/unmount`.
+- Per-app Zygisk skip policy: `skip_packages.txt` and `skip_uids.txt` under `/data/adb/ksu/originzygisk`. Matching processes are injected but receive no module callbacks or mounts.
+- Per-module policy: `disabled_modules.txt` and `quarantine.txt` filter modules when the 32/64-bit daemons start (changes apply next boot).
+- `bin/originzygiskctl` provides status, integrity, module, telemetry, skip and control commands over the existing monitor datagram socket.
+- Injection telemetry is appended to `telemetry.jsonl` (one 128 KiB rotation); the manager bundles it with state, boot logs, pstore and filtered logcat for diagnostics.
 
 # ReZygisk
 

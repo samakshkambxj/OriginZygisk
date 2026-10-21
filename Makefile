@@ -32,7 +32,7 @@ LOADER_INPUTS = common.mk loader/Makefile \
 ZYGISKD_INPUTS = common.mk zygiskd/Makefile \
         $(shell find zygiskd/src -type f | sort)
 
-MODULE_INPUTS = scripts/sign.py \
+MODULE_INPUTS = scripts/sign.py scripts/originzygiskctl.sh \
         $(shell find module/src -type f | sort) \
         $(shell find webroot -type f | sort) \
         $(wildcard module/private_key module/public_key)
@@ -69,7 +69,7 @@ $(MODULE_DONE): $(LOADER_DONE) $(ZYGISKD_DONE) $(MODULE_INPUTS)
 	@mkdir -p $(MODULE_OUT)
 
 	@echo "Copying module files..."
-	@cp module/src/verify.sh module/src/sepolicy.rule module/src/originzygisk.sh module/src/action.sh $(MODULE_OUT)/
+	@cp module/src/verify.sh module/src/sepolicy.rule module/src/originzygisk.sh module/src/action.sh scripts/originzygiskctl.sh $(MODULE_OUT)/
 
 	@echo "Customizing module.prop..."
 	@sed -e 's/$${moduleId}/$(MODULE_ID)/g'                                             \
