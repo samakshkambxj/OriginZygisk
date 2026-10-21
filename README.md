@@ -4,6 +4,12 @@ OriginZygisk is a fork of BreZygisk (a ReZygisk fork), maintained for OriginSU.
 
 [Changelog](https://github.com/PerformanC/ReZygisk/compare/main...rrr333nnn333:BreZygisk:main)
 
+## Status
+
+- The module description is updated by the monitor with the current 64-bit and 32-bit daemon state.
+- The module **Action** button prints the version, monitor process state and the engine's `state.json`.
+- `state.json` is written atomically and contains the root implementation, loaded modules and monitor/daemon errors. It is valid JSON even when the monitor stops with a reason.
+
 # ReZygisk
 
 [Español(Argentina)](/READMEs/README_es-AR.md)|[Bahasa Indonesia](/READMEs/README_id-ID.md)|[Português Brasileiro](/READMEs/README_pt-BR.md)|[Українська](/READMEs/README_uk-UA.md)|[Tiếng Việt](/READMEs/README_vi-VN.md)|[فارسی](/READMEs/README_fa-IR.md)|[简体中文](/READMEs/README_zh-CN.md)

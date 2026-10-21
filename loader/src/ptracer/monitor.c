@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -17,6 +18,8 @@
 #include "monitor.h"
 
 #define SOCKET_NAME "init_monitor"
+#define STATE_PATH "/data/adb/rezygisk/state.json"
+#define STATE_TMP_PATH "/data/adb/rezygisk/state.json.tmp"
 
 #define STOPPED_WITH(sig, event) (WIFSTOPPED(sigchld_status) && (sigchld_status >> 8 == ((sig) | ((event) << 8))))
 
@@ -813,6 +816,29 @@ static char post_section[1024];
     }                                                                                \
   }
 
+static void write_json_string(FILE *out, const char *value) {
+  fputc('"', out);
+
+  if (value != NULL) {
+    for (const unsigned char *p = (const unsigned char *)value; *p != '\0'; p++) {
+      switch (*p) {
+        case '"': fputs("\\\"", out); break;
+        case '\\': fputs("\\\\", out); break;
+        case '\b': fputs("\\b", out); break;
+        case '\f': fputs("\\f", out); break;
+        case '\n': fputs("\\n", out); break;
+        case '\r': fputs("\\r", out); break;
+        case '\t': fputs("\\t", out); break;
+        default:
+          if (*p < 0x20) fprintf(out, "\\u%04x", (unsigned int)*p);
+          else fputc(*p, out);
+      }
+    }
+  }
+
+  fputc('"', out);
+}
+
 static bool update_status(const char *message) {
   FILE *prop = fopen("/data/adb/ksu/originzygisk/module.prop", "w");
   if (prop == NULL) {
@@ -855,7 +881,7 @@ static bool update_status(const char *message) {
   fclose(prop);
 
   if (environment_information64.root_impl || environment_information32.root_impl) {
-    FILE *json = fopen("/data/adb/rezygisk/state.json", "w");
+    FILE *json = fopen(STATE_TMP_PATH, "w");
     if (json == NULL) {
       PLOGE("failed to open state.json");
 
@@ -863,30 +889,40 @@ static bool update_status(const char *message) {
     }
 
     fprintf(json, "{\n");
-    fprintf(json, "  \"root\": \"%s\",\n", environment_information64.root_impl ? environment_information64.root_impl : environment_information32.root_impl);
+    fprintf(json, "  \"root\": ");
+    write_json_string(json, environment_information64.root_impl ? environment_information64.root_impl : environment_information32.root_impl);
+    fprintf(json, ",\n");
 
     fprintf(json, "  \"monitor\": {\n");
-    fprintf(json, "    \"state\": \"%d\"", tracing_state);
-    if (monitor_stop_reason) fprintf(json, ",\n    \"reason\": \"%s\",\n", monitor_stop_reason);
-    else fprintf(json, "\n");
+    fprintf(json, "    \"state\": %d", tracing_state);
+    if (monitor_stop_reason) {
+      fprintf(json, ",\n    \"reason\": ");
+      write_json_string(json, monitor_stop_reason);
+      fprintf(json, "\n");
+    } else {
+      fprintf(json, "\n");
+    }
 
     if (status64.supported || status32.supported)
       fprintf(json, "  },\n");
     else
       fprintf(json, "  }\n");
 
-
     if (status64.supported || status32.supported) {
       fprintf(json, "  \"rezygiskd\": {\n");
       if (status64.supported) {
         fprintf(json, "    \"64\": {\n");
         fprintf(json, "      \"state\": %d,\n", status64.daemon_running);
-        if (status64.daemon_error_info) fprintf(json, "      \"reason\": \"%s\",\n", status64.daemon_error_info);
+        if (status64.daemon_error_info) {
+          fprintf(json, "      \"reason\": ");
+          write_json_string(json, status64.daemon_error_info);
+          fprintf(json, ",\n");
+        }
         fprintf(json, "      \"modules\": [");
 
         if (environment_information64.modules) for (uint32_t i = 0; i < environment_information64.modules_len; i++) {
           if (i > 0) fprintf(json, ", ");
-          fprintf(json, "\"%s\"", environment_information64.modules[i]);
+          write_json_string(json, environment_information64.modules[i]);
         }
 
         fprintf(json, "]\n");
@@ -898,12 +934,16 @@ static bool update_status(const char *message) {
       if (status32.supported) {
         fprintf(json, "    \"32\": {\n");
         fprintf(json, "      \"state\": %d,\n", status32.daemon_running);
-        if (status32.daemon_error_info) fprintf(json, "      \"reason\": \"%s\",\n", status32.daemon_error_info);
+        if (status32.daemon_error_info) {
+          fprintf(json, "      \"reason\": ");
+          write_json_string(json, status32.daemon_error_info);
+          fprintf(json, ",\n");
+        }
         fprintf(json, "      \"modules\": [");
 
         if (environment_information32.modules) for (uint32_t i = 0; i < environment_information32.modules_len; i++) {
           if (i > 0) fprintf(json, ", ");
-          fprintf(json, "\"%s\"", environment_information32.modules[i]);
+          write_json_string(json, environment_information32.modules[i]);
         }
 
         fprintf(json, "]\n");
@@ -926,11 +966,33 @@ static bool update_status(const char *message) {
 
     fprintf(json, "}\n");
 
-    fclose(json);
+    if (ferror(json)) {
+      LOGE("failed to write state.json");
+      fclose(json);
+      remove(STATE_TMP_PATH);
+
+      return false;
+    }
+
+    if (fclose(json) != 0) {
+      PLOGE("failed to close state.json");
+      remove(STATE_TMP_PATH);
+
+      return false;
+    }
+
+    if (rename(STATE_TMP_PATH, STATE_PATH) == -1) {
+      PLOGE("failed to replace state.json");
+      remove(STATE_TMP_PATH);
+
+      return false;
+    }
   } else {
-    if (remove("/data/adb/rezygisk/state.json") == -1) {
+    if (remove(STATE_PATH) == -1 && errno != ENOENT) {
       PLOGE("failed to remove state.json");
     }
+
+    remove(STATE_TMP_PATH);
   }
 
   LOGI("status updated: %s", status_text);

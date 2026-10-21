@@ -81,12 +81,14 @@ ui_print "- Extracting module files"
 extract "$ZIPFILE" 'module.prop'     "$MODPATH"
 extract "$ZIPFILE" 'post-fs-data.sh' "$MODPATH"
 extract "$ZIPFILE" 'service.sh'      "$MODPATH"
+extract "$ZIPFILE" 'action.sh'       "$MODPATH"
 extract "$ZIPFILE" 'uninstall.sh'    "$MODPATH"
 extract "$ZIPFILE" 'originzygisk.sh' "/data/adb/service.d/"
 
 cp "$MODPATH/module.prop" "$MODPATH/module.prop.bak"
 
 chmod +x "$MODPATH/uninstall.sh"
+chmod +x "$MODPATH/action.sh"
 chmod +x "/data/adb/service.d/originzygisk.sh"
 
 mv "$TMPDIR/sepolicy.rule" "$MODPATH"
